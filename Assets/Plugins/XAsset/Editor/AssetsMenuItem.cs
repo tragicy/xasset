@@ -82,6 +82,102 @@ namespace Plugins.XAsset.Editor
             BuildScript.CopyAssetBundlesTo(Path.Combine(Application.streamingAssetsPath, Utility.AssetBundles));
         }
 
+        [MenuItem("Windows/Gogogo")]
+        private static void MarkAssetsFromABData()
+        {
+            AssetsManifest assetsManifest = BuildScript.GetManifest();
+            assetsManifest.Clear();
+            ABPathData pathData = BuildScript.GetAsset<ABPathData>("Assets/AssetPathData.asset");
+            for (int i = 0; i < pathData.assetPaths.Count; i++)
+            {
+                if (pathData.assetPaths[i].type == AssetPathType.FOLDER)
+                {
+                    MarkAssetsWithDir(pathData.assetPaths[i].path);
+                }
+                else
+                    MarkAssetsWithFile(pathData.assetPaths[i].path);
+            }
+        }
+        private static void MarkAssetsWithDir(string dirPath)
+        {
+            //var filePaths = Directory.GetFiles(dirPath);
+            var filePaths = Directory.GetFiles(dirPath);
+            //var assets = AssetDatabase.LoadAllAssetsAtPath(dirPath);
+            for (var i = 0; i <filePaths.Length ; i++)
+            {
+                if (filePaths[i].EndsWith("meta"))
+                    continue;
+
+                string filePath = filePaths[i].Replace("\\", "/");
+                var asset = AssetDatabase.LoadAssetAtPath<Object>(filePath);
+
+                //var asset = assets[i];
+                var path = AssetDatabase.GetAssetPath(asset);
+                if (Directory.Exists(path) || path.EndsWith(".cs", System.StringComparison.CurrentCulture))
+                    continue;
+                if (EditorUtility.DisplayCancelableProgressBar(KMarkAssets, path, i * 1f / filePaths.Length))
+                    break;
+                var assetBundleName = Path.GetDirectoryName(path).Replace("\\", "/") + "_g";
+                BuildScript.SetAssetBundleNameAndVariant(path, assetBundleName.ToLower(), null);
+            }
+            EditorUtility.ClearProgressBar();
+        }
+
+        private static void MarkAssetsWithFile(string dirPath)
+        {
+            var filePaths = Directory.GetFiles(dirPath);
+            //var assets = AssetDatabase.LoadAllAssetsAtPath(dirPath);
+            for (var i = 0; i < filePaths.Length; i++)
+            {
+                if (filePaths[i].EndsWith("meta"))
+                    continue;
+
+                string filePath = filePaths[i].Replace("\\", "/");
+                var asset = AssetDatabase.LoadAssetAtPath<Object>(filePath);
+                //var asset = assets[i];
+                var path = AssetDatabase.GetAssetPath(asset);
+                if (Directory.Exists(path) || path.EndsWith(".cs", System.StringComparison.CurrentCulture))
+                    continue;
+                if (EditorUtility.DisplayCancelableProgressBar(KMarkAssets, path, i * 1f / filePaths.Length))
+                    break;  
+                
+                var dir = Path.GetDirectoryName(path);
+                var name = Path.GetFileNameWithoutExtension(path);
+                if (dir == null)
+                    continue;
+                dir = dir.Replace("\\", "/");
+                if (name == null)
+                    continue;
+
+                var assetBundleName = TrimedAssetBundleName(Path.Combine(dir, name));
+                BuildScript.SetAssetBundleNameAndVariant(path, assetBundleName.ToLower(), null); 
+            }
+
+            EditorUtility.ClearProgressBar();
+        }
+
+        [MenuItem(KMarkAssetsWithName)]
+        private static void MarkAssetsWithName(string filePath)
+        {
+            var assets = Selection.GetFiltered<Object>(SelectionMode.DeepAssets);
+            for (var i = 0; i < assets.Length; i++)
+            {
+                var asset = assets[i];
+                var path = AssetDatabase.GetAssetPath(asset);
+                if (Directory.Exists(path) || path.EndsWith(".cs", System.StringComparison.CurrentCulture))
+
+                    continue;
+                if (EditorUtility.DisplayCancelableProgressBar(KMarkAssets, path, i * 1f / assets.Length))
+                    break; 
+                var assetBundleName = Path.GetFileNameWithoutExtension(path);
+                BuildScript.SetAssetBundleNameAndVariant(path, assetBundleName.ToLower(), null);  
+            } 
+
+            EditorUtility.ClearProgressBar();
+        } 
+
+
+
         [MenuItem(KMarkAssetsWithDir)]
         private static void MarkAssetsWithDir()
         {
@@ -100,7 +196,8 @@ namespace Plugins.XAsset.Editor
 
             EditorUtility.ClearProgressBar();
         }
-
+        
+       
         [MenuItem(KMarkAssetsWithFile)]
         private static void MarkAssetsWithFile()
         {

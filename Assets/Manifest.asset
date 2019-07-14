@@ -14,6 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   downloadURL: 
   activeVariants: []
-  bundles: []
-  dirs: []
-  assets: []
+  bundles:
+  - assets/demo/prefabs\uiroot
+  - assets/demo/prefabs\uiroot2
+  dirs:
+  - Assets/Demo/Prefabs
+  assets:
+  - variant: -1
+    bundle: 0
+    dir: 0
+    name: UIRoot.prefab
+  - variant: -1
+    bundle: 1
+    dir: 0
+    name: UIRoot2.prefab

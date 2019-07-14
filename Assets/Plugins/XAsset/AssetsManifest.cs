@@ -45,5 +45,12 @@ namespace Plugins.XAsset
         public string[] bundles = new string[0];
         public string[] dirs = new string[0];
         public AssetData[] assets = new AssetData[0];
+
+        public void Clear()
+        {
+            bundles = new string[0];
+            dirs = new string[0];
+            assets = new AssetData[0];
+        }
     }
 }

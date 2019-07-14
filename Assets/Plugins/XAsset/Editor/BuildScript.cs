@@ -439,7 +439,7 @@ namespace Plugins.XAsset.Editor
             }
         }
 
-        private static T GetAsset<T>(string path) where T : ScriptableObject
+        public static T GetAsset<T>(string path) where T : ScriptableObject
         {
             var asset = AssetDatabase.LoadAssetAtPath<T>(path);
             if (asset == null)
